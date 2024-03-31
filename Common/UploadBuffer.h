@@ -3,6 +3,7 @@
 #include "d3dUtil.h"
 
 template<typename T>
+//You may find detailed explanations for UploadBuffer class in Chapter 6 Drawing in Direct3D section 6.6
 class UploadBuffer
 {
 public:
