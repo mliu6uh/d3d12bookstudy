@@ -431,9 +431,10 @@ void BoxApp::BuildBoxGeometry()
 	submesh.BaseVertexLocation = 0;
 
 	mBoxGeo->DrawArgs["box"] = submesh;
-}
+} 
 
-void BoxApp::BuildPSO()
+//Build PipeLine State Object
+void BoxApp::BuildPSO() 
 {
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
     ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
