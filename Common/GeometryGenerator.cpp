@@ -65,7 +65,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBox(float width, float heig
 
 	uint32 i[36];
 
-	// Fill in the back face index data
+	// Fill in the back face-front view index data
 	i[0] = 0; i[1] = 2; i[2] = 1;
 	i[3] = 0; i[4] = 3; i[5] = 2;
 
@@ -73,14 +73,25 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBox(float width, float heig
 	//i[12] = 8; i[13] = 9; i[14] = 10;
 	//i[15] = 8; i[16] = 10; i[17] = 11;
 
-	// Fill in the bottom face index data
+	// Fill in the bottom face-front view index data
 	i[6] = 4; i[7] = 6; i[8] = 5;
 	i[9] = 4; i[10] = 7; i[11] = 6;
 
-	// Fill in the left face index data
+	// Fill in the left/front face index data
 	i[12] = 8; i[13] = 10; i[14] = 9;
 	i[15] = 8; i[16] = 11; i[17] = 10;
 
+	//Fill in the left/back face index data
+	i[18] = 8; i[19] = 9; i[20] = 10;
+	i[21] = 8; i[22] = 10; i[23] = 11;
+
+	// Fill in the back face-back view index data
+	i[24] = 0; i[25] = 1; i[26] = 2;
+	i[27] = 0; i[28] = 2; i[29] = 3;
+
+	// Fill in the bottom face-back view index data
+	i[30] = 4; i[31] = 5; i[32] = 6;
+	i[33] = 4; i[34] = 6; i[35] = 7;
 	//// Fill in the right face index data
 	//i[30] = 20; i[31] = 21; i[32] = 22;
 	//i[33] = 20; i[34] = 22; i[35] = 23;
@@ -109,7 +120,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBox(float width, float heig
 	//i[30] = 20; i[31] = 21; i[32] = 22;
 	//i[33] = 20; i[34] = 22; i[35] = 23;
 
-	meshData.Indices32.assign(&i[0], &i[18]);
+	meshData.Indices32.assign(&i[0], &i[36]);
 
     // Put a cap on the number of subdivisions.
     numSubdivisions = std::min<uint32>(numSubdivisions, 6u);

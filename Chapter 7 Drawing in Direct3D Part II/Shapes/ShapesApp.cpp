@@ -713,7 +713,7 @@ void ShapesApp::BuildRenderItems()
 	boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
 	mAllRitems.push_back(std::move(boxRitem));
 
-    auto gridRitem = std::make_unique<RenderItem>();
+  /*  auto gridRitem = std::make_unique<RenderItem>();
     gridRitem->World = MathHelper::Identity4x4();
 	gridRitem->ObjCBIndex = 1;
 	gridRitem->Geo = mGeometries["shapeGeo"].get();
@@ -772,8 +772,8 @@ void ShapesApp::BuildRenderItems()
 		mAllRitems.push_back(std::move(leftCylRitem));
 		mAllRitems.push_back(std::move(rightCylRitem));
 		mAllRitems.push_back(std::move(leftSphereRitem));
-		mAllRitems.push_back(std::move(rightSphereRitem));
-	}
+		mAllRitems.push_back(std::move(rightSphereRitem));*/
+	//}
 
 	// All the render items are opaque.
 	for(auto& e : mAllRitems)
