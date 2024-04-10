@@ -3,6 +3,7 @@
 //***************************************************************************************
 
 #include "GeometryGenerator.h"
+#include "./MathHelper.h"
 #include <algorithm>
 
 using namespace DirectX;
@@ -417,8 +418,12 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 	//
 	// Build Stacks.
 	// 
-
 	float stackHeight = height / stackCount;
+	
+	//
+	//Rotation Matrix to build the vertices of section incline to y-axis with certain angle - inclination
+	//
+	XMMATRIX rotMat = XMMatrixRotationZ(15.0f * XM_PI / 180.0f);
 
 	// Amount to increment radius as we move up each stack level from bottom to top.
 	float radiusStep = (topRadius - bottomRadius) / stackCount;
@@ -439,8 +444,13 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 
 			float c = cosf(j*dTheta);
 			float s = sinf(j*dTheta);
+			XMVECTOR rotVec = XMVectorSet(r * c,  y,  r * s, 0.0f);
+			XMVECTOR resultVec = XMVector4Transform(rotVec,  rotMat);
+			float x = XMVectorGetX(resultVec);
+			float y = XMVectorGetY(resultVec);
+			float z = XMVectorGetZ(resultVec);
 
-			vertex.Position = XMFLOAT3(r*c, y, r*s);
+			vertex.Position = XMFLOAT3(x, y, z);
 
 			vertex.TexC.x = (float)j/sliceCount;
 			vertex.TexC.y = 1.0f - (float)i/stackCount;
