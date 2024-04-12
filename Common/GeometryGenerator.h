@@ -111,6 +111,7 @@ public:
     MeshData CreateQuad(float x, float y, float w, float h, float depth);
 
 private:
+	//XMFLOAT3 Rotate(FXMVECTOR vec, FXMMATRIX rotMatrix);
 	void Subdivide(MeshData& meshData);
     Vertex MidPoint(const Vertex& v0, const Vertex& v1);
     void BuildCylinderTopCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);

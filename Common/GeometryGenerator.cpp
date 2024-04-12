@@ -243,6 +243,15 @@ GeometryGenerator::MeshData GeometryGenerator::CreateSphere(float radius, uint32
     return meshData;
 }
  
+//XMFLOAT3 GeometryGenerator::Rotate(FXMVECTOR vec, FXMMATRIX rotMatrix)
+//{
+//	XMFLOAT3 threeFloats;
+//
+//	XMVECTOR resultVec = XMVector4Transform(vec, rotMatrix);
+//	XMStoreFloat3(&threeFloats, resultVec);
+//	return threeFloats;
+//}
+
 void GeometryGenerator::Subdivide(MeshData& meshData)
 {
 	// Save a copy of the input geometry.
@@ -423,7 +432,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 	//
 	//Rotation Matrix to build the vertices of section incline to y-axis with certain angle - inclination
 	//
-	XMMATRIX rotMat = XMMatrixRotationZ(15.0f * XM_PI / 180.0f);
+	XMMATRIX inclinedMat = XMMatrixRotationZ(15.0f * XM_PI / 180.0f);
 
 	// Amount to increment radius as we move up each stack level from bottom to top.
 	float radiusStep = (topRadius - bottomRadius) / stackCount;
@@ -445,7 +454,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 			float c = cosf(j*dTheta);
 			float s = sinf(j*dTheta);
 			XMVECTOR rotVec = XMVectorSet(r * c,  y,  r * s, 0.0f);
-			XMVECTOR resultVec = XMVector4Transform(rotVec,  rotMat);
+			XMVECTOR resultVec = XMVector4Transform(rotVec,  inclinedMat);
 			float x = XMVectorGetX(resultVec);
 			float y = XMVectorGetY(resultVec);
 			float z = XMVectorGetZ(resultVec);
@@ -521,23 +530,33 @@ void GeometryGenerator::BuildCylinderTopCap(float bottomRadius, float topRadius,
 
 	float y = 0.5f*height;
 	float dTheta = 2.0f*XM_PI/sliceCount;
+	XMMATRIX inclinedMat = XMMatrixRotationZ(15.0f * XM_PI / 180.0f);
 
 	// Duplicate cap ring vertices because the texture coordinates and normals differ.
 	for(uint32 i = 0; i <= sliceCount; ++i)
 	{
 		float x = topRadius*cosf(i*dTheta);
 		float z = topRadius*sinf(i*dTheta);
-
+		XMVECTOR vertexVector = XMVectorSet(x, y, z, 0.0f);
+		XMVECTOR resultVec = XMVector4Transform(vertexVector, inclinedMat);
+		x = XMVectorGetX(resultVec);
+		float newY = XMVectorGetY(resultVec);
+		z = XMVectorGetZ(resultVec);
 		// Scale down by the height to try and make top cap texture coord area
 		// proportional to base.
-		float u = x/height + 0.5f;
-		float v = z/height + 0.5f;
-
-		meshData.Vertices.push_back( Vertex(x, y, z, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v) );
+		float u = x / height +0.5f;
+		float v = z / height +0.5f;
+		meshData.Vertices.push_back( Vertex(x, newY, z, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v) );
 	}
 
 	// Cap center vertex.
-	meshData.Vertices.push_back( Vertex(0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f) );
+	//Top cap center vertex transformation
+	XMVECTOR centerVertexVector = XMVectorSet(0.0f, y, 0.0f, 0.0f);
+	XMVECTOR resultCenterVec = XMVector4Transform(centerVertexVector, inclinedMat);
+	float centerX = XMVectorGetX(resultCenterVec);
+	float centerY = XMVectorGetY(resultCenterVec);
+
+	meshData.Vertices.push_back( Vertex(centerX, centerY, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f) );
 
 	// Index of center vertex.
 	uint32 centerIndex = (uint32)meshData.Vertices.size()-1;
@@ -559,24 +578,33 @@ void GeometryGenerator::BuildCylinderBottomCap(float bottomRadius, float topRadi
 
 	uint32 baseIndex = (uint32)meshData.Vertices.size();
 	float y = -0.5f*height;
-
+	XMMATRIX inclinedMat = XMMatrixRotationZ(15.0f * XM_PI / 180.0f);
 	// vertices of ring
 	float dTheta = 2.0f*XM_PI/sliceCount;
 	for(uint32 i = 0; i <= sliceCount; ++i)
 	{
 		float x = bottomRadius*cosf(i*dTheta);
 		float z = bottomRadius*sinf(i*dTheta);
-
+		XMVECTOR vertexVector = XMVectorSet(x, y, z, 0.0f);
+		XMVECTOR resultVec = XMVector4Transform(vertexVector, inclinedMat);
+		x = XMVectorGetX(resultVec);
+		float newY = XMVectorGetY(resultVec);
+		z = XMVectorGetZ(resultVec);
 		// Scale down by the height to try and make top cap texture coord area
 		// proportional to base.
 		float u = x/height + 0.5f;
 		float v = z/height + 0.5f;
 
-		meshData.Vertices.push_back( Vertex(x, y, z, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v) );
+		meshData.Vertices.push_back( Vertex(x, newY, z, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v) );
 	}
 
 	// Cap center vertex.
-	meshData.Vertices.push_back( Vertex(0.0f, y, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f) );
+	//Bottom cap center vertex transformation
+	XMVECTOR centerVertexVector = XMVectorSet(0.0f, y, 0.0f, 0.0f);
+	XMVECTOR resultCenterVec = XMVector4Transform(centerVertexVector, inclinedMat);
+	float centerX = XMVectorGetX(resultCenterVec);
+	float centerY = XMVectorGetY(resultCenterVec);
+	meshData.Vertices.push_back( Vertex(centerX, centerY, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f) );
 
 	// Cache the index of center vertex.
 	uint32 centerIndex = (uint32)meshData.Vertices.size()-1;
