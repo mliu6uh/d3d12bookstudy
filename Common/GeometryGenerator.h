@@ -18,12 +18,13 @@
 #include <DirectXMath.h>
 #include <vector>
 
-class GeometryGenerator
+static class GeometryGenerator
 {
 public:
 
     using uint16 = std::uint16_t;
     using uint32 = std::uint32_t;
+	
 
 	struct Vertex
 	{
@@ -72,6 +73,8 @@ public:
 
 	private:
 		std::vector<uint16> mIndices16;
+		//rotation transformation inclined cylinder angle
+		//XMMATRIX inclinedMat = XMMatrixRotationZ(75.0f * XM_PI / 180.0f);
 	};
 
 	///<summary>
@@ -97,7 +100,7 @@ public:
 	/// The bottom and top radius can vary to form various cone shapes rather than true
 	// cylinders.  The slices and stacks parameters control the degree of tessellation.
 	///</summary>
-    MeshData CreateCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount);
+    MeshData CreateInclinedCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount);
 
 	///<summary>
 	/// Creates an mxn grid in the xz-plane with m rows and n columns, centered
@@ -114,7 +117,7 @@ private:
 	//XMFLOAT3 Rotate(FXMVECTOR vec, FXMMATRIX rotMatrix);
 	void Subdivide(MeshData& meshData);
     Vertex MidPoint(const Vertex& v0, const Vertex& v1);
-    void BuildCylinderTopCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
-    void BuildCylinderBottomCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
+    void BuildInclinedCylinderTopCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
+    void BuildInclinedCylinderBottomCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
 };
 

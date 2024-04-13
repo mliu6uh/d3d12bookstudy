@@ -420,7 +420,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGeosphere(float radius, uin
     return meshData;
 }
 
-GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount)
+GeometryGenerator::MeshData GeometryGenerator::CreateInclinedCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount)
 {
     MeshData meshData;
 
@@ -432,7 +432,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 	//
 	//Rotation Matrix to build the vertices of section incline to y-axis with certain angle - inclination
 	//
-	XMMATRIX inclinedMat = XMMatrixRotationZ(15.0f * XM_PI / 180.0f);
+	XMMATRIX inclinedMat = XMMatrixRotationZ(75.0f * XM_PI / 180.0f);
 
 	// Amount to increment radius as we move up each stack level from bottom to top.
 	float radiusStep = (topRadius - bottomRadius) / stackCount;
@@ -517,20 +517,20 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 		}
 	}
 
-	BuildCylinderTopCap(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
-	BuildCylinderBottomCap(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
+	BuildInclinedCylinderTopCap(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
+	BuildInclinedCylinderBottomCap(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
 
     return meshData;
 }
 
-void GeometryGenerator::BuildCylinderTopCap(float bottomRadius, float topRadius, float height,
+void GeometryGenerator::BuildInclinedCylinderTopCap(float bottomRadius, float topRadius, float height,
 											uint32 sliceCount, uint32 stackCount, MeshData& meshData)
 {
 	uint32 baseIndex = (uint32)meshData.Vertices.size();
 
 	float y = 0.5f*height;
 	float dTheta = 2.0f*XM_PI/sliceCount;
-	XMMATRIX inclinedMat = XMMatrixRotationZ(15.0f * XM_PI / 180.0f);
+	XMMATRIX inclinedMat = XMMatrixRotationZ(75.0f * XM_PI / 180.0f);
 
 	// Duplicate cap ring vertices because the texture coordinates and normals differ.
 	for(uint32 i = 0; i <= sliceCount; ++i)
@@ -569,7 +569,7 @@ void GeometryGenerator::BuildCylinderTopCap(float bottomRadius, float topRadius,
 	}
 }
 
-void GeometryGenerator::BuildCylinderBottomCap(float bottomRadius, float topRadius, float height,
+void GeometryGenerator::BuildInclinedCylinderBottomCap(float bottomRadius, float topRadius, float height,
 											   uint32 sliceCount, uint32 stackCount, MeshData& meshData)
 {
 	// 
@@ -578,7 +578,7 @@ void GeometryGenerator::BuildCylinderBottomCap(float bottomRadius, float topRadi
 
 	uint32 baseIndex = (uint32)meshData.Vertices.size();
 	float y = -0.5f*height;
-	XMMATRIX inclinedMat = XMMatrixRotationZ(15.0f * XM_PI / 180.0f);
+	XMMATRIX inclinedMat = XMMatrixRotationZ(75.0f * XM_PI / 180.0f);
 	// vertices of ring
 	float dTheta = 2.0f*XM_PI/sliceCount;
 	for(uint32 i = 0; i <= sliceCount; ++i)
