@@ -531,7 +531,7 @@ void ShapesApp::BuildShapeGeometry()
 	//GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
 	//GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData cylinder = geoGen.CreateInclinedCylinder(0.1f, 0.1f, 3.0f, 20, 20);
-
+	GeometryGenerator::MeshData curvedCylinder = geoGen.CreateCurvedCylinder(0.1f, 0.1f, 3.0f, 20, 20);
 	//
 	// We are concatenating all the geometry into one big vertex/index buffer.  So
 	// define the regions in the buffer each submesh covers.
@@ -543,6 +543,7 @@ void ShapesApp::BuildShapeGeometry()
     //UINT gridVertexOffset = 0;
 	//UINT sphereVertexOffset = gridVertexOffset + (UINT)grid.Vertices.size();
 	UINT cylinderVertexOffset = boxVertexOffset + (UINT)box.Vertices.size();
+	UINT curvedCylinderVertexOffset = cylinderVertexOffset + (UINT)cylinder.Vertices.size();
 
 	// Cache the starting index for each object in the concatenated index buffer.
     //UINT gridIndexOffset = 0;
@@ -550,6 +551,8 @@ void ShapesApp::BuildShapeGeometry()
 	//UINT gridIndexOffset = (UINT)box.Indices32.size();
 	//UINT sphereIndexOffset = gridIndexOffset + (UINT)grid.Indices32.size();
 	UINT cylinderIndexOffset = boxIndexOffset + (UINT)box.Indices32.size();
+	UINT curvedCylinderIndexOffset = cylinderIndexOffset + (UINT)cylinder.Indices32.size();
+
 
     // Define the SubmeshGeometry that cover different 
     // regions of the vertex/index buffers.
@@ -569,18 +572,22 @@ void ShapesApp::BuildShapeGeometry()
 	//sphereSubmesh.StartIndexLocation = sphereIndexOffset;
 	//sphereSubmesh.BaseVertexLocation = sphereVertexOffset;
 
-	SubmeshGeometry cylinderSubmesh;
-	cylinderSubmesh.IndexCount = (UINT)cylinder.Indices32.size();
-	cylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
-	cylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
+	SubmeshGeometry inclinedCylinderSubmesh;
+	inclinedCylinderSubmesh.IndexCount = (UINT)cylinder.Indices32.size();
+	inclinedCylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
+	inclinedCylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
 
+	SubmeshGeometry curvedCylinderSubmesh;
+	curvedCylinderSubmesh.IndexCount = (UINT)curvedCylinder.Indices32.size();
+	curvedCylinderSubmesh.StartIndexLocation = curvedCylinderIndexOffset;
+	curvedCylinderSubmesh.BaseVertexLocation = curvedCylinderVertexOffset;
 	//
 	// Extract the vertex elements we are interested in and pack the
 	// vertices of all the meshes into one vertex buffer.
 	//
 
     auto totalVertexCount =
-       box.Vertices.size() + cylinder.Vertices.size();
+       box.Vertices.size() + cylinder.Vertices.size() + curvedCylinder.Vertices.size();
        //+
 		/*grid.Vertices.size() +
 		sphere.Vertices.size() +
@@ -613,9 +620,17 @@ void ShapesApp::BuildShapeGeometry()
 		vertices[k].Color = XMFLOAT4(DirectX::Colors::SteelBlue);
 	}
 
+	for (size_t i = 0; i < curvedCylinder.Vertices.size(); ++i, ++k)
+	{
+		vertices[k].Pos = curvedCylinder.Vertices[i].Position;
+		vertices[k].Color = XMFLOAT4(DirectX::Colors::SteelBlue);
+	}
+
 	std::vector<std::uint16_t> indices;
 	indices.insert(indices.end(), std::begin(box.GetIndices16()), std::end(box.GetIndices16()));
     indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));
+	indices.insert(indices.end(), std::begin(curvedCylinder.GetIndices16()), std::end(curvedCylinder.GetIndices16()));
+
 	//indices.insert(indices.end(), std::begin(grid.GetIndices16()), std::end(grid.GetIndices16()));
 	/*indices.insert(indices.end(), std::begin(sphere.GetIndices16()), std::end(sphere.GetIndices16()));
 	indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));*/
@@ -646,7 +661,8 @@ void ShapesApp::BuildShapeGeometry()
 	geo->DrawArgs["box"] = boxSubmesh;
 	//geo->DrawArgs["grid"] = gridSubmesh;
 	//geo->DrawArgs["sphere"] = sphereSubmesh;
-	geo->DrawArgs["cylinder"] = cylinderSubmesh;
+	geo->DrawArgs["cylinder"] = inclinedCylinderSubmesh;
+	geo->DrawArgs["curvedCylinder"] = curvedCylinderSubmesh;
 
 	mGeometries[geo->Name] = std::move(geo);
 }
@@ -726,50 +742,42 @@ void ShapesApp::BuildRenderItems()
 	mAllRitems.push_back(std::move(gridRitem));
     */
 	UINT objCBIndex = 1;
-	auto leftCylRitem = std::make_unique<RenderItem>();
+	auto inclinedCylRitem = std::make_unique<RenderItem>();
 	/*auto rightCylRitem = std::make_unique<RenderItem>();
 	auto leftSphereRitem = std::make_unique<RenderItem>();
 	auto rightSphereRitem = std::make_unique<RenderItem>();*/
 
-	XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 5.0f, -10.0f);
+	XMMATRIX inclinedCylWorld = XMMatrixTranslation(-1.0f, -1.0f, -1.0f);
 	/*XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i * 5.0f);
 
 	XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i * 5.0f);
 	XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i * 5.0f);*/
 
-	//XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
-	leftCylRitem->ObjCBIndex = objCBIndex++;
-	leftCylRitem->Geo = mGeometries["shapeGeo"].get();
-	leftCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	leftCylRitem->IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-	leftCylRitem->StartIndexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-	leftCylRitem->BaseVertexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
+	XMStoreFloat4x4(&inclinedCylRitem->World, inclinedCylWorld);
+	inclinedCylRitem->ObjCBIndex = objCBIndex++;
+	inclinedCylRitem->Geo = mGeometries["shapeGeo"].get();
+	inclinedCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	inclinedCylRitem->IndexCount = inclinedCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
+	inclinedCylRitem->StartIndexLocation = inclinedCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
+	inclinedCylRitem->BaseVertexLocation = inclinedCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
 
-	///*XMStoreFloat4x4(&rightCylRitem->World, leftCylWorld);
-	//rightCylRitem->ObjCBIndex = objCBIndex++;
-	//rightCylRitem->Geo = mGeometries["shapeGeo"].get();
-	//rightCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	//rightCylRitem->IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-	//rightCylRitem->StartIndexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-	//rightCylRitem->BaseVertexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
+	auto curvedCylRitem = std::make_unique<RenderItem>();
+	/*auto rightCylRitem = std::make_unique<RenderItem>();
+	auto leftSphereRitem = std::make_unique<RenderItem>();
+	auto rightSphereRitem = std::make_unique<RenderItem>();*/
 
-	//XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
-	//leftSphereRitem->ObjCBIndex = objCBIndex++;
-	//leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
-	//leftSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	//leftSphereRitem->IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-	//leftSphereRitem->StartIndexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-	//leftSphereRitem->BaseVertexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
+	XMMATRIX curvedCylWorld = XMMatrixTranslation(1.0f, 1.0f, 1.0f);
+	XMStoreFloat4x4(&curvedCylRitem->World, curvedCylWorld);
+	curvedCylRitem->ObjCBIndex = objCBIndex++;
+	curvedCylRitem->Geo = mGeometries["shapeGeo"].get();
+	curvedCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	curvedCylRitem->IndexCount = curvedCylRitem->Geo->DrawArgs["curvedCylinder"].IndexCount;
+	curvedCylRitem->StartIndexLocation = curvedCylRitem->Geo->DrawArgs["curvedCylinder"].StartIndexLocation;
+	curvedCylRitem->BaseVertexLocation = curvedCylRitem->Geo->DrawArgs["curvedCylinder"].BaseVertexLocation;
 
-	//XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
-	//rightSphereRitem->ObjCBIndex = objCBIndex++;
-	//rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
-	//rightSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	//rightSphereRitem->IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-	//rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-	//rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;*/
+	mAllRitems.push_back(std::move(inclinedCylRitem));
+	mAllRitems.push_back(std::move(curvedCylRitem));
 
-	mAllRitems.push_back(std::move(leftCylRitem));
 	/*mAllRitems.push_back(std::move(rightCylRitem));
 	mAllRitems.push_back(std::move(leftSphereRitem));
 	mAllRitems.push_back(std::move(rightSphereRitem));*/

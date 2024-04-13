@@ -102,6 +102,9 @@ public:
 	///</summary>
     MeshData CreateInclinedCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount);
 
+	///</summary>
+	MeshData CreateCurvedCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount);
+
 	///<summary>
 	/// Creates an mxn grid in the xz-plane with m rows and n columns, centered
 	/// at the origin with the specified width and depth.
@@ -119,5 +122,7 @@ private:
     Vertex MidPoint(const Vertex& v0, const Vertex& v1);
     void BuildInclinedCylinderTopCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
     void BuildInclinedCylinderBottomCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
+	void BuildCurvedCylinderTopCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
+	void BuildCurvedCylinderBottomCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
 };
 
