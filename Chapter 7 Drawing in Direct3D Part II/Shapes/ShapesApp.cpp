@@ -530,7 +530,7 @@ void ShapesApp::BuildShapeGeometry()
 	GeometryGenerator::MeshData box = geoGen.CreateBox(4.0f, 4.0f, 4.0f, 4);
 	//GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
 	//GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
-	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.1f, 0.1f, 3.0f, 20, 20);
+	GeometryGenerator::MeshData cylinder = geoGen.CreateInclinedCylinder(0.1f, 0.1f, 3.0f, 20, 20);
 
 	//
 	// We are concatenating all the geometry into one big vertex/index buffer.  So
