@@ -638,23 +638,33 @@ void GeometryGenerator::BuildCurvedCylinderTopCap(float bottomRadius, float topR
 
 	float y = 0.5f * height;
 	float dTheta = 2.0f * XM_PI / sliceCount;
+	XMMATRIX inclinedMat = XMMatrixRotationZ(30.0f * XM_PI / 180.0f);
 
 	// Duplicate cap ring vertices because the texture coordinates and normals differ.
 	for (uint32 i = 0; i <= sliceCount; ++i)
 	{
 		float x = topRadius * cosf(i * dTheta);
 		float z = topRadius * sinf(i * dTheta);
-
+		XMVECTOR vertexVector = XMVectorSet(x, y, z, 0.0f);
+		XMVECTOR resultVec = XMVector4Transform(vertexVector, inclinedMat);
+		x = XMVectorGetX(resultVec);
+		float newY = XMVectorGetY(resultVec);
+		z = XMVectorGetZ(resultVec);
 		// Scale down by the height to try and make top cap texture coord area
 		// proportional to base.
 		float u = x / height + 0.5f;
 		float v = z / height + 0.5f;
-
-		meshData.Vertices.push_back(Vertex(x, y, z, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v));
+		meshData.Vertices.push_back(Vertex(x, newY, z, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v));
 	}
 
 	// Cap center vertex.
-	meshData.Vertices.push_back(Vertex(0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f));
+	//Top cap center vertex transformation
+	XMVECTOR centerVertexVector = XMVectorSet(0.0f, y, 0.0f, 0.0f);
+	XMVECTOR resultCenterVec = XMVector4Transform(centerVertexVector, inclinedMat);
+	float centerX = XMVectorGetX(resultCenterVec);
+	float centerY = XMVectorGetY(resultCenterVec);
+
+	meshData.Vertices.push_back(Vertex(centerX, centerY, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f));
 
 	// Index of center vertex.
 	uint32 centerIndex = (uint32)meshData.Vertices.size() - 1;
@@ -665,6 +675,37 @@ void GeometryGenerator::BuildCurvedCylinderTopCap(float bottomRadius, float topR
 		meshData.Indices32.push_back(baseIndex + i + 1);
 		meshData.Indices32.push_back(baseIndex + i);
 	}
+	//uint32 baseIndex = (uint32)meshData.Vertices.size();
+
+	//float y = 0.5f * height;
+	//float dTheta = 2.0f * XM_PI / sliceCount;
+
+	//// Duplicate cap ring vertices because the texture coordinates and normals differ.
+	//for (uint32 i = 0; i <= sliceCount; ++i)
+	//{
+	//	float x = topRadius * cosf(i * dTheta);
+	//	float z = topRadius * sinf(i * dTheta);
+
+	//	// Scale down by the height to try and make top cap texture coord area
+	//	// proportional to base.
+	//	float u = x / height + 0.5f;
+	//	float v = z / height + 0.5f;
+
+	//	meshData.Vertices.push_back(Vertex(x, y, z, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v));
+	//}
+
+	//// Cap center vertex.
+	//meshData.Vertices.push_back(Vertex(0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f));
+
+	//// Index of center vertex.
+	//uint32 centerIndex = (uint32)meshData.Vertices.size() - 1;
+
+	//for (uint32 i = 0; i < sliceCount; ++i)
+	//{
+	//	meshData.Indices32.push_back(centerIndex);
+	//	meshData.Indices32.push_back(baseIndex + i + 1);
+	//	meshData.Indices32.push_back(baseIndex + i);
+	//}
 }
 
 void GeometryGenerator::BuildCurvedCylinderBottomCap(float bottomRadius, float topRadius, float height,
@@ -676,7 +717,7 @@ void GeometryGenerator::BuildCurvedCylinderBottomCap(float bottomRadius, float t
 
 	uint32 baseIndex = (uint32)meshData.Vertices.size();
 	float y = -0.5f * height;
-	XMMATRIX inclinedMat = XMMatrixRotationZ(75.0f * XM_PI / 180.0f);
+	XMMATRIX inclinedMat = XMMatrixRotationZ(0.0f * XM_PI / 180.0f);
 	// vertices of ring
 	float dTheta = 2.0f * XM_PI / sliceCount;
 	for (uint32 i = 0; i <= sliceCount; ++i)
